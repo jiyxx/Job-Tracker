@@ -1,0 +1,291 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { createApplication, updateApplication, fetchApplications } from "../store/applicationsSlice";
+
+const emptyForm = {
+  companyName: "",
+  role: "",
+  location: "",
+  dateApplied: "",
+  status: "Applied",
+  jobLink: "",
+  jobDescription: "",
+  notes: "",
+};
+
+const REQUIRED_FIELDS = ["companyName", "role", "location", "dateApplied"];
+
+const STATUS_OPTIONS = [
+  "Applied",
+  "Shortlisted",
+  "Interview Scheduled",
+  "Offer Received",
+  "Rejected",
+];
+
+const AddApplication = () => {
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const items = useSelector((state) => state.applications.items);
+  const [form, setForm] = useState(emptyForm);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isEditMode && items.length === 0) {
+      dispatch(fetchApplications());
+    }
+  }, [isEditMode, items.length, dispatch]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      const existing = items.find((a) => a._id === id);
+      if (existing) {
+        setForm({
+          companyName: existing.companyName || "",
+          role: existing.role || "",
+          location: existing.location || "",
+          dateApplied: existing.dateApplied ? existing.dateApplied.slice(0, 10) : "",
+          status: existing.status || "Applied",
+          jobLink: existing.jobLink || "",
+          jobDescription: existing.jobDescription || "",
+          notes: existing.notes || "",
+        });
+      }
+    }
+  }, [isEditMode, id, items]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  const validate = () => {
+    const errors = {};
+    REQUIRED_FIELDS.forEach((field) => {
+      if (!form[field] || !form[field].trim()) {
+        errors[field] = `${field} is required`;
+      }
+    });
+    return errors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitError("");
+
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setSubmitting(true);
+    const payload = { ...form };
+
+    const action = isEditMode
+      ? updateApplication({ id, updates: payload })
+      : createApplication(payload);
+
+    const result = await dispatch(action);
+    setSubmitting(false);
+
+    if (result.meta.requestStatus === "fulfilled") {
+      navigate("/applications");
+    } else {
+      setSubmitError(result.payload || "Something went wrong. Please try again.");
+    }
+  };
+
+  const inputClass = (field) =>
+    `w-full rounded-md border px-3 py-2 text-sm text-ink-900 focus:outline-none ${
+      fieldErrors[field]
+        ? "border-red-400 focus:border-red-500"
+        : "border-ink-200 focus:border-teal-600"
+    }`;
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+      <h1 className="font-display text-display-md font-bold text-ink-900">
+        {isEditMode ? "Edit application" : "Add application"}
+      </h1>
+      <p className="mt-1 text-sm text-ink-600">
+        {isEditMode ? "Update the details below." : "Log a new job you've applied to."}
+      </p>
+
+      <form onSubmit={handleSubmit} noValidate className="mt-6 rounded-card border border-ink-100 bg-white p-6 shadow-card">
+        {submitError && (
+          <div className="mb-4 rounded-md bg-clay-50 px-3 py-2 text-sm text-clay-700">
+            {submitError}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="companyName">
+              Company name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="companyName"
+              name="companyName"
+              type="text"
+              value={form.companyName}
+              onChange={handleChange}
+              className={inputClass("companyName")}
+              placeholder="e.g. Google"
+            />
+            {fieldErrors.companyName && (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.companyName}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="role">
+              Role <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="role"
+              name="role"
+              type="text"
+              value={form.role}
+              onChange={handleChange}
+              className={inputClass("role")}
+              placeholder="e.g. SDE Intern"
+            />
+            {fieldErrors.role && <p className="mt-1 text-xs text-red-600">{fieldErrors.role}</p>}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="location">
+              Location <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="location"
+              name="location"
+              type="text"
+              value={form.location}
+              onChange={handleChange}
+              className={inputClass("location")}
+              placeholder="e.g. Bangalore"
+            />
+            {fieldErrors.location && (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.location}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="dateApplied">
+              Date applied <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="dateApplied"
+              name="dateApplied"
+              type="date"
+              value={form.dateApplied}
+              onChange={handleChange}
+              className={inputClass("dateApplied")}
+            />
+            {fieldErrors.dateApplied && (
+              <p className="mt-1 text-xs text-red-600">{fieldErrors.dateApplied}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="status">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="w-full rounded-md border border-ink-200 px-3 py-2 text-sm text-ink-900 focus:border-teal-600 focus:outline-none"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="jobLink">
+              Job link
+            </label>
+            <input
+              id="jobLink"
+              name="jobLink"
+              type="url"
+              value={form.jobLink}
+              onChange={handleChange}
+              className="w-full rounded-md border border-ink-200 px-3 py-2 text-sm text-ink-900 focus:border-teal-600 focus:outline-none"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="jobDescription">
+              Job description
+            </label>
+            <textarea
+              id="jobDescription"
+              name="jobDescription"
+              rows={4}
+              value={form.jobDescription}
+              onChange={handleChange}
+              className="w-full rounded-md border border-ink-200 px-3 py-2 text-sm text-ink-900 focus:border-teal-600 focus:outline-none"
+              placeholder="Paste the job description here…"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-sm font-medium text-ink-800" htmlFor="notes">
+              Notes
+            </label>
+            <textarea
+              id="notes"
+              name="notes"
+              rows={4}
+              value={form.notes}
+              onChange={handleChange}
+              className="w-full rounded-md border border-ink-200 px-3 py-2 text-sm text-ink-900 focus:border-teal-600 focus:outline-none"
+              placeholder="Any personal notes about this application…"
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-md bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
+          >
+            {submitting ? "Saving…" : isEditMode ? "Save changes" : "Add application"}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/applications")}
+            className="rounded-md border border-ink-200 px-4 py-2.5 text-sm font-medium text-ink-800 hover:bg-ink-50"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default AddApplication;

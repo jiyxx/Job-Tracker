@@ -19,7 +19,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="border-b border-gray-100 bg-white">
+    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/applications" className="flex items-center gap-2 text-xl font-bold text-gray-900">
           <Briefcase size={22} strokeWidth={2.5} />

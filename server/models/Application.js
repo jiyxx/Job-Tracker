@@ -59,6 +59,10 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    aiSummary: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true } // adds createdAt, updatedAt
 );

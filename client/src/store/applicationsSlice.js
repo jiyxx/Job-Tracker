@@ -66,6 +66,18 @@ export const updateStatus = createAsyncThunk(
   }
 );
 
+export const generateApplicationSummary = createAsyncThunk(
+  "applications/generateApplicationSummary",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post(`/applications/${id}/summarize`);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "AI summary generation failed");
+    }
+  }
+);
+
 export const deleteApplication = createAsyncThunk(
   "applications/delete",
   async (id, { rejectWithValue }) => {
@@ -83,6 +95,8 @@ const initialState = {
   stats: null,
   status: "idle", // idle | loading | succeeded | failed — for applications LIST
   error: null,
+  summaryLoadingId: null,
+  summaryError: null,
   statsStatus: "idle", // idle | loading | succeeded | failed — for dashboard STATS
   statsError: null,
   filters: {
@@ -150,6 +164,22 @@ const applicationsSlice = createSlice({
         const idx = state.items.findIndex((a) => a._id === action.payload._id);
         if (idx !== -1) state.items[idx] = action.payload;
         state.statsStatus = "idle";
+      })
+      // Summary
+      .addCase(generateApplicationSummary.pending, (state, action) => {
+        state.summaryLoadingId = action.meta.arg;
+        state.summaryError = null;
+      })
+      .addCase(generateApplicationSummary.fulfilled, (state, action) => {
+        state.summaryLoadingId = null;
+        const application = state.items.find((a) => a._id === action.payload.id);
+        if (application) {
+          application.aiSummary = action.payload.aiSummary;
+        }
+      })
+      .addCase(generateApplicationSummary.rejected, (state, action) => {
+        state.summaryLoadingId = null;
+        state.summaryError = action.payload;
       })
       // Delete
       .addCase(deleteApplication.fulfilled, (state, action) => {

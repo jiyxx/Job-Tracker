@@ -4,6 +4,7 @@ const Application = require("../models/Application");
 const { APPLICATION_STATUSES } = require("../models/Application");
 const { protect } = require("../middleware/auth");
 const { AppError } = require("../middleware/error");
+const { generateSummary } = require("../utils/openai");
 
 const router = express.Router();
 
@@ -131,9 +132,12 @@ router.post(
 //  Edit an existing application
 router.put("/:id", async (req, res, next) => {
   try {
+    const update = { ...req.body };
+    delete update.aiSummary;
+
     const application = await Application.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      req.body,
+      { ...update, aiSummary: "" },
       { returnDocument: "after", runValidators: true }
     );
 
@@ -180,6 +184,61 @@ router.patch(
     }
   }
 );
+
+// @route   POST /api/applications/:id/summarize
+// @desc    Generate an AI summary of the application details
+router.post("/:id/summarize", async (req, res, next) => {
+  try {
+    const application = await Application.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+
+    if (!application) throw new AppError("Application not found", 404);
+
+    const summary = await generateSummary({
+      content: [
+        `Company: ${application.companyName}`,
+        `Role: ${application.role}`,
+        `Status: ${application.status}`,
+        application.jobDescription ? `Job Description: ${application.jobDescription}` : null,
+        application.notes ? `Personal Notes: ${application.notes}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+      systemPrompt:
+        [
+          "You are an interview-prep coach and hiring manager.",
+          "Create a detailed, educational, actionable overview for this job application.",
+          "Do not produce a short summary.",
+          "Return clean markdown with headings, bullet points, and bold lead-ins for important terms.",
+          "Keep each section focused and complete. Prefer 3-5 bullets per section instead of long paragraphs.",
+          "Use these sections exactly and tailor them to the application context:",
+          "# Overview",
+          "# Key Topics",
+          "# Detailed Explanation of Each Topic",
+          "# Interview Questions",
+          "# Follow-up Questions",
+          "# Coding Problems (if applicable)",
+          "# Common Mistakes",
+          "# What to Focus On",
+          "# Revision Checklist",
+          "# Final Preparation Plan",
+          "Explain the role, status, job description, and personal notes in simple language.",
+          "Highlight what the candidate should revise first, common mistakes to avoid, and likely interview questions based on the application details.",
+          "Suggest related concepts, best approaches, and a clear preparation priority.",
+          "Use bold formatting for key topic names, action items, and revision priorities.",
+        ].join(" "),
+    });
+
+    application.aiSummary = summary;
+    await application.save();
+
+    res.json({ id: application._id, aiSummary: summary });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // @route   DELETE /api/applications/:id
 // @desc    Delete an application

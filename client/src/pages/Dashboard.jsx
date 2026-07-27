@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { fetchStats } from "../store/applicationsSlice";
+import { useNavigate } from "react-router-dom";
 
 const STATUS_GROUPS = [
   { label: "Applied", color: "#3B82F6", statuses: ["Applied"] },
@@ -14,17 +15,21 @@ const STATUS_GROUPS = [
   { label: "Offer", color: "#22C55E", statuses: ["Offer Received"] },
 ];
 
-const SummaryCard = ({ label, value, valueClass }) => (
-  <div className="rounded-2xl bg-gray-50 p-5">
+const SummaryCard = ({ label, value, valueClass, onClick }) => (
+  <button
+    onClick={onClick}
+    className="rounded-2xl bg-gray-50 p-5 text-left transition-all hover:shadow-md hover:scale-[1.02] cursor-pointer"
+  >
     <p className="text-sm text-gray-500">{label}</p>
     <p className={`mt-1 text-3xl font-bold ${valueClass}`}>{value}</p>
-  </div>
+  </button>
 );
 
 const Dashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { stats, statsStatus, statsError } = useSelector(
-    (state) => state.applications
+    (state) => state.applications,
   );
 
   // Fetch stats only ONCE when status is idle
@@ -81,21 +86,40 @@ const Dashboard = () => {
           label="Total"
           value={stats.total}
           valueClass="text-gray-900"
+          onClick={() => navigate("/applications", { state: { status: "" } })}
         />
+
         <SummaryCard
           label="Active"
           value={stats.active}
           valueClass="text-blue-600"
+          onClick={() =>
+            navigate("/applications", {
+              state: { status: "Applied" },
+            })
+          }
         />
+
         <SummaryCard
           label="Offers"
           value={stats.offers}
           valueClass="text-green-600"
+          onClick={() =>
+            navigate("/applications", {
+              state: { status: "Offer Received" },
+            })
+          }
         />
+
         <SummaryCard
           label="Rejected"
           value={stats.rejected}
           valueClass="text-red-600"
+          onClick={() =>
+            navigate("/applications", {
+              state: { status: "Rejected" },
+            })
+          }
         />
       </div>
 

@@ -3,6 +3,7 @@ const { body, validationResult } = require("express-validator");
 const Note = require("../models/Note");
 const { protect } = require("../middleware/auth");
 const { AppError } = require("../middleware/error");
+const { generateSummary } = require("../utils/openai");
  
 const router = express.Router();
  
@@ -81,10 +82,13 @@ router.post(
 // Edit a note
 router.put("/:id", async (req, res, next) => {
   try {
+    const update = { ...req.body };
+    delete update.aiSummary;
+
     const note = await Note.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id, deletedAt: null },
-      req.body,
-      { new: true, runValidators: true }
+      { ...update, aiSummary: "" },
+      { returnDocument: "after", runValidators: true }
     );
     if (!note) throw new AppError("Note not found", 404);
     res.json(note);
@@ -111,7 +115,7 @@ router.delete("/:id", async (req, res, next) => {
 
  
 // @route   POST /api/notes/:id/summarize
-// @desc    Bonus feature — one-click AI summary of a note using OpenAI API
+// @desc    Bonus feature — one-click AI summary of a note using Gemini API
 router.post("/:id/summarize", async (req, res, next) => {
   try {
     const note = await Note.findOne({
@@ -120,38 +124,38 @@ router.post("/:id/summarize", async (req, res, next) => {
       deletedAt: null,
     });
     if (!note) throw new AppError("Note not found", 404);
- 
-    if (!process.env.OPENAI_API_KEY) {
-      throw new AppError("OpenAI API key not configured on server", 500);
-    }
- 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Summarize the user's interview/job-prep note in 3-4 concise bullet points. Keep the key facts and action items, cut filler.",
-          },
-          { role: "user", content: note.content },
-        ],
-        max_tokens: 200,
-      }),
+    const summary = await generateSummary({
+      content: [
+        `Title: ${note.title}`,
+        note.tags?.length ? `Tags: ${note.tags.join(", ")}` : null,
+        `Content: ${note.content}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+      systemPrompt:
+        [
+          "You are an interview-prep coach and senior interviewer.",
+          "Create a detailed, educational, actionable interview-prep overview from the note.",
+          "Do not give a short summary.",
+          "Return clean markdown with headings, bullet points, and bold lead-ins for important terms.",
+          "Keep each section focused and complete. Prefer 3-5 bullets per section instead of long paragraphs.",
+          "Use these sections exactly and write in simple language with practical guidance:",
+          "# Overview",
+          "# Key Topics",
+          "# Detailed Explanation of Each Topic",
+          "# Interview Questions",
+          "# Follow-up Questions",
+          "# Coding Problems (if applicable)",
+          "# Common Mistakes",
+          "# What to Focus On",
+          "# Revision Checklist",
+          "# Final Preparation Plan",
+          "For each topic, explain why it matters in interviews, what the candidate should revise, and how to prepare.",
+          "Include likely questions, follow-up questions, best approaches, and common mistakes when relevant.",
+          "If the note includes interview experience, extract all important topics and prioritize the most important ones for revision.",
+          "Use bold formatting for key topic names, action items, and revision priorities.",
+        ].join(" "),
     });
- 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new AppError(`OpenAI API error: ${errText}`, 502);
-    }
- 
-    const data = await response.json();
-    const summary = data.choices?.[0]?.message?.content?.trim() || "";
  
     note.aiSummary = summary;
     await note.save();

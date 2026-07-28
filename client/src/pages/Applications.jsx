@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import ApplicationFormModal from "../components/ApplicationFormModal";
 import {
   fetchApplications,
   generateApplicationSummary,
@@ -64,6 +65,8 @@ const Applications = () => {
   const { items, status, error, filters, summaryLoadingId, summaryError } =
     useSelector((state) => state.applications);
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingApplication, setEditingApplication] = useState(null);
 
   useEffect(() => {
     if (status === "idle") {
@@ -116,15 +119,18 @@ const Applications = () => {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">All applications</h1>
-        <Link
-          to="/applications/new"
+        <button
+          onClick={() => {
+            setEditingApplication(null);
+            setShowFormModal(true);
+          }}
           className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-900 hover:bg-gray-50"
         >
           + Add new
-        </Link>
+        </button>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
@@ -174,12 +180,15 @@ const Applications = () => {
               : "Try adjusting your search query or status filter."}
           </p>
           {items.length === 0 && (
-            <Link
-              to="/applications/new"
+            <button
+              onClick={() => {
+                setEditingApplication(null);
+                setShowFormModal(true);
+              }}
               className="mt-5 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-900 hover:bg-gray-50"
             >
               Add your first application
-            </Link>
+            </button>
           )}
         </div>
       )}
@@ -352,9 +361,11 @@ const Applications = () => {
               {/* Footer */}
               <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-100">
                 <button
-                  onClick={() =>
-                    navigate(`/applications/${selectedApplication._id}/edit`)
-                  }
+                  onClick={() => {
+                    setSelectedApplication(null);
+                    setEditingApplication(selectedApplication);
+                    setShowFormModal(true);
+                  }}
                   className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-5 py-2 text-sm font-bold text-gray-900 hover:bg-gray-50 transition-colors"
                 >
                   <Pencil size={15} />
@@ -372,6 +383,14 @@ const Applications = () => {
           </div>
         </div>
       )}
+      <ApplicationFormModal
+        open={showFormModal}
+        application={editingApplication}
+        onClose={() => {
+          setShowFormModal(false);
+          setEditingApplication(null);
+        }}
+      />
     </div>
   );
 };

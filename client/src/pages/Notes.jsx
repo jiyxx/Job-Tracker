@@ -474,7 +474,7 @@ const Notes = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Google — System Design prep"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-300 focus:border-gray-400 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-xs text-gray-300 focus:border-gray-400 focus:outline-none"
                 />
               </div>
 
@@ -487,7 +487,7 @@ const Notes = () => {
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   placeholder="e.g. Google, System Design"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-xs text-gray-900 focus:border-gray-400 focus:outline-none"
                 />
               </div>
 
@@ -504,7 +504,7 @@ const Notes = () => {
                     resizeTextarea(e.target);
                   }}
                   placeholder="Revise load balancing, caching strategies, database sharding..."
-                  className="w-full overflow-hidden rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-900 focus:border-gray-400 focus:outline-none transition-[height] duration-150 resize-none"
+                  className="w-full overflow-hidden rounded-xl border border-gray-200 px-3.5 py-2.5 text-xs text-gray-900 focus:border-gray-400 focus:outline-none transition-[height] duration-150 resize-none"
                 />
               </div>
 

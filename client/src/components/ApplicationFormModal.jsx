@@ -120,26 +120,35 @@ const ApplicationFormModal = ({ open, onClose, application }) => {
     }`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden">
-        <div className="max-h-[90vh] overflow-y-auto p-6">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-            <h2 className="text-xl font-bold text-gray-900">
-              {isEditMode ? "Edit Application" : "Add Application"}
-            </h2>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 cursor-pointer"
+      onClick={() => onClose()}
+    >
+      <div
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden cursor-default"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Sticky Header */}
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 bg-white shrink-0">
+          <h2 className="text-xl font-bold text-gray-900">
+            {isEditMode ? "Edit Application" : "Add Application"}
+          </h2>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-xl"
-            >
-              ✕
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 text-xl shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Scrollable Form Body */}
+        <div className="flex-1 overflow-y-auto p-6">
           <form
             onSubmit={handleSubmit}
             noValidate
-            className=" rounded-card  bg-white p-6 shadow-card"
+            className="bg-white"
           >
             {submitError && (
               <div className="mb-4 rounded-md bg-clay-50 px-3 py-2 text-sm text-clay-700">
@@ -315,7 +324,7 @@ const ApplicationFormModal = ({ open, onClose, application }) => {
               </div>
             </div>
 
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-6 flex items-center gap-3 pt-4 border-t border-gray-100">
               <button
                 type="submit"
                 disabled={submitting}

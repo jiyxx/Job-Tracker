@@ -51,6 +51,9 @@ const Notes = () => {
       textarea.scrollHeight > TEXTAREA_MAX_HEIGHT ? "auto" : "hidden";
   };
 
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState(null);
+
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchNotes());
@@ -156,12 +159,23 @@ const Notes = () => {
     }, 0);
   };
 
-  const handleDelete = (id, noteTitle, e) => {
+  const handleDelete = (note, e) => {
     if (e) e.stopPropagation();
-    if (window.confirm(`Delete note "${noteTitle}"?`)) {
-      dispatch(deleteNote(id));
-      if (selectedNote?._id === id) setSelectedNote(null);
+    setNoteToDelete(note);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!noteToDelete) return;
+
+    dispatch(deleteNote(noteToDelete._id));
+
+    if (selectedNote?._id === noteToDelete._id) {
+      setSelectedNote(null);
     }
+
+    setDeleteModalOpen(false);
+    setNoteToDelete(null);
   };
 
   const handleAiSummary = (id, e) => {
@@ -247,7 +261,7 @@ const Notes = () => {
                   {note.title}
                 </h3>
                 <button
-                  onClick={(e) => handleDelete(note._id, note.title, e)}
+                  onClick={(e) => handleDelete(note, e)}
                   className="text-gray-400 hover:text-red-600 transition-colors p-1 shrink-0"
                   title="Delete note"
                 >
@@ -308,46 +322,54 @@ const Notes = () => {
 
       {/* VIEW & LIVE-EDIT NOTE DETAIL MODAL */}
       {selectedNote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden">
-            <div className="max-h-[90vh] overflow-y-auto p-6 [scrollbar-gutter:stable]">
-              <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-                <div className="flex-1 mr-4">
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                    Tap title to edit
-                  </label>
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onBlur={handleSaveEdit}
-                    placeholder="Note Title..."
-                    className="text-xl font-bold text-gray-900 w-full bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-400 focus:outline-none py-1 transition-colors"
-                  />
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {(selectedNote.tags?.length > 0
-                      ? selectedNote.tags
-                      : ["General"]
-                    ).map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center rounded-full bg-purple-100 px-3 py-0.5 text-xs font-semibold text-purple-700"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 cursor-pointer"
+          onClick={handleCloseModal}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl border border-gray-100 bg-white shadow-xl overflow-hidden cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Sticky Header */}
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 bg-white shrink-0">
+              <div className="flex-1 mr-4">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+                  Tap title to edit
+                </label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onBlur={handleSaveEdit}
+                  placeholder="Note Title..."
+                  className="text-xl font-bold text-gray-900 w-full bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-400 focus:outline-none py-1 transition-colors"
+                />
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {(selectedNote.tags?.length > 0
+                    ? selectedNote.tags
+                    : ["General"]
+                  ).map((tag, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center rounded-full bg-purple-100 px-3 py-0.5 text-xs font-semibold text-purple-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-                <button
-                  onClick={handleCloseModal}
-                  className="text-gray-400 hover:text-gray-600 p-1 shrink-0"
-                >
-                  <X size={22} />
-                </button>
               </div>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-400 hover:text-gray-600 p-1 shrink-0"
+              >
+                <X size={22} />
+              </button>
+            </div>
 
+            {/* Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
               {/* Editable Content */}
-              <div className="mt-4">
+              <div>
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
                     Content
@@ -387,7 +409,7 @@ const Notes = () => {
               </div>
 
               {/* AI Summary Section */}
-              <div className="mt-6">
+              <div>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
                     <Sparkles size={14} className="text-purple-600" />
@@ -408,9 +430,7 @@ const Notes = () => {
                 </div>
 
                 {selectedNote.aiSummary ? (
-                  <div className="rounded-xl border border-purple-100 bg-purple-50/60 p-4 text-sm text-purple-950 whitespace-pre-wrap break-words leading-relaxed">
-                    <SummaryRenderer text={selectedNote.aiSummary} />
-                  </div>
+                  <SummaryRenderer text={selectedNote.aiSummary} />
                 ) : (
                   <p className="text-xs text-gray-400 italic">
                     No AI summary generated yet. Click "Generate AI Summary" to
@@ -418,24 +438,66 @@ const Notes = () => {
                   </p>
                 )}
               </div>
+            </div>
 
-              <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-100">
-                <button
-                  onClick={(e) =>
-                    handleDelete(selectedNote._id, selectedNote.title, e)
-                  }
-                  className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700"
-                >
-                  <Trash2 size={14} />
-                  Delete note
-                </button>
-                <button
-                  onClick={handleCloseModal}
-                  className="rounded-xl border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                >
-                  Done
-                </button>
-              </div>
+            {/* Sticky Footer */}
+            <div className="flex items-center justify-between p-4 px-6 border-t border-gray-100 bg-white shrink-0">
+              <button
+                onClick={(e) => handleDelete(selectedNote, e)}
+                className="flex items-center gap-1 text-xs font-semibold text-red-600 hover:text-red-700"
+              >
+                <Trash2 size={14} />
+                Delete note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={() => {
+            setDeleteModalOpen(false);
+            setNoteToDelete(null);
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl"
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <Trash2 className="text-red-600" size={32} />
+            </div>
+
+            <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+              Delete Note?
+            </h2>
+            <p className="mt-4 text-center text-gray-600">
+              Are you sure you want to delete this note?
+            </p>
+
+            <p className="mt-2 text-center text-sm text-gray-400">
+              This action cannot be undone.
+            </p>
+
+            <div className="mt-8 flex gap-4">
+              <button
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setNoteToDelete(null);
+                }}
+                className="flex-1 rounded-xl border border-gray-200 py-3 text-lg font-semibold hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmDelete}
+                className="flex-1 rounded-xl bg-red-600 py-3 text-lg font-semibold text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
@@ -474,7 +536,7 @@ const Notes = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Google — System Design prep"
-                  className="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-xs text-gray-300 focus:border-gray-400 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-xs text-gray-900 focus:border-gray-400 focus:outline-none"
                 />
               </div>
 

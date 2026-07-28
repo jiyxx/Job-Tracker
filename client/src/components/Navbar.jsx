@@ -1,3 +1,4 @@
+// export default Navbar;
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Briefcase } from "lucide-react";
@@ -19,7 +20,11 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-md">
+    // NOTE: shadow instead of border-b — a border adds to the element's
+    // rendered height, which was pushing total page height 1px past 100vh
+    // and causing a persistent scrollbar. box-shadow doesn't affect layout
+    // height, so it gives the same visual divider without the overflow.
+    <header className="bg-white shadow-sm">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/applications" className="flex items-center gap-2 text-xl font-bold text-gray-900">
           <Briefcase size={22} strokeWidth={2.5} />
@@ -56,7 +61,8 @@ const Navbar = () => {
               to="/register"
               className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-bold text-white hover:bg-teal-700"
             >
-              Sign Up</Link>
+              Sign Up
+            </Link>
           )}
         </div>
       </div>

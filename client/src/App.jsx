@@ -20,7 +20,6 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/applications" element={<Applications />} />
           <Route path="/applications/new" element={<AddApplication />} />
-          <Route path="/applications/:id/edit" element={<AddApplication />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/notes" element={<Notes />} />
         </Route>

@@ -26,11 +26,15 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#FAFAF8] px-4">
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-[#FAFAF8] px-4">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-10 shadow-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome <span className="text-teal-600"> back</span></h1>
-          <p className="mt-2 text-sm text-gray-500">Log in to your Job Tracker</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome <span className="text-teal-600"> back</span>
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Log in to your Job Tracker
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -40,7 +44,10 @@ const Login = () => {
             </div>
           )}
 
-          <label className="mb-1.5 block text-sm font-semibold text-gray-800" htmlFor="email">
+          <label
+            className="mb-1.5 block text-sm font-semibold text-gray-800"
+            htmlFor="email"
+          >
             Email
           </label>
           <input
@@ -54,7 +61,10 @@ const Login = () => {
             placeholder="you@example.com"
           />
 
-          <label className="mb-1.5 block text-sm font-semibold text-gray-800" htmlFor="password">
+          <label
+            className="mb-1.5 block text-sm font-semibold text-gray-800"
+            htmlFor="password"
+          >
             Password
           </label>
           <div className="relative mb-6">
@@ -90,7 +100,10 @@ const Login = () => {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           No account?{" "}
-          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-700">
+          <Link
+            to="/register"
+            className="font-medium text-blue-600 hover:text-blue-700"
+          >
             Register
           </Link>
         </p>

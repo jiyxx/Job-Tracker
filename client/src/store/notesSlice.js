@@ -9,9 +9,11 @@ export const fetchNotes = createAsyncThunk(
       const { data } = await api.get("/notes", { params });
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to load notes");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to load notes",
+      );
     }
-  }
+  },
 );
 
 export const createNote = createAsyncThunk(
@@ -21,9 +23,11 @@ export const createNote = createAsyncThunk(
       const { data } = await api.post("/notes", noteData);
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to create note");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to create note",
+      );
     }
-  }
+  },
 );
 
 export const updateNote = createAsyncThunk(
@@ -33,9 +37,11 @@ export const updateNote = createAsyncThunk(
       const { data } = await api.put(`/notes/${id}`, updates);
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to update note");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to update note",
+      );
     }
-  }
+  },
 );
 
 export const deleteNote = createAsyncThunk(
@@ -45,9 +51,11 @@ export const deleteNote = createAsyncThunk(
       await api.delete(`/notes/${id}`);
       return id;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to delete note");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to delete note",
+      );
     }
-  }
+  },
 );
 
 export const generateAiSummary = createAsyncThunk(
@@ -57,9 +65,11 @@ export const generateAiSummary = createAsyncThunk(
       const { data } = await api.post(`/notes/${id}/summarize`);
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "AI summary generation failed");
+      return rejectWithValue(
+        err.response?.data?.message || "AI summary generation failed",
+      );
     }
-  }
+  },
 );
 
 const initialState = {
@@ -72,7 +82,9 @@ const initialState = {
 const notesSlice = createSlice({
   name: "notes",
   initialState,
-  reducers: {},
+  reducers: {
+    resetNotesState: () => initialState,
+  },
   extraReducers: (builder) => {
     builder
       // fetchNotes
@@ -120,4 +132,5 @@ const notesSlice = createSlice({
   },
 });
 
+export const { resetNotesState } = notesSlice.actions;
 export default notesSlice.reducer;

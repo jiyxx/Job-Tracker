@@ -54,12 +54,14 @@ const Notes = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState(null);
 
+  const user = useSelector((state) => state.auth.user);
   useEffect(() => {
+    if (!user) return;
+
     if (status === "idle") {
       dispatch(fetchNotes());
     }
-  }, [dispatch, status]);
-
+  }, [dispatch, user, status]);
   // Synchronize modal inputs when a note is opened
   useEffect(() => {
     if (selectedNote) {

@@ -3,6 +3,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Briefcase } from "lucide-react";
 import { logout } from "../store/authSlice";
+import { resetApplicationsState } from "../store/applicationsSlice";
+import { resetNotesState } from "../store/notesSlice";
 
 const navLinkClass = ({ isActive }) =>
   `rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
@@ -15,7 +17,10 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
 
   const handleLogout = () => {
+    dispatch(resetApplicationsState());
+    dispatch(resetNotesState());
     dispatch(logout());
+
     navigate("/login");
   };
 
@@ -26,7 +31,10 @@ const Navbar = () => {
     // height, so it gives the same visual divider without the overflow.
     <header className="bg-white shadow-sm">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link to="/applications" className="flex items-center gap-2 text-xl font-bold text-gray-900">
+        <Link
+          to="/applications"
+          className="flex items-center gap-2 text-xl font-bold text-gray-900"
+        >
           <Briefcase size={22} strokeWidth={2.5} />
           Job<span className="text-teal-600">Tracker</span>
         </Link>
@@ -48,7 +56,9 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <span className="hidden text-sm text-gray-600 sm:inline">Hi, {user.name}</span>
+              <span className="hidden text-sm text-gray-600 sm:inline">
+                Hi, {user.name}
+              </span>
               <button
                 onClick={handleLogout}
                 className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-bold text-white hover:bg-teal-700"

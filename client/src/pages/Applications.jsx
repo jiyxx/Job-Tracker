@@ -74,12 +74,15 @@ const Applications = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState(null);
 
+  const user = useSelector((state) => state.auth.user);
+
   useEffect(() => {
+    if (!user) return;
+
     if (status === "idle") {
       dispatch(fetchApplications());
     }
-  }, [dispatch, status]);
-
+  }, [dispatch, user, status]);
   // Keep selectedApplication synced with Redux store updates
   useEffect(() => {
     if (selectedApplication) {

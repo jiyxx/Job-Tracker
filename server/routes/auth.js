@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { protect } = require("../middleware/auth");
+const passport = require("passport");
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.post("/register", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.status(201).json({
@@ -49,7 +50,9 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
     const user = await User.findOne({ email }).select("+password");
@@ -66,7 +69,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     res.status(200).json({
@@ -91,5 +94,51 @@ router.get("/me", protect, async (req, res) => {
     email: req.user.email,
   });
 });
+
+// GOOGLE OAUTH ROUTES
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+    prompt: "select_account",
+  }),
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "http://localhost:5173/login",
+  }),
+  async (req, res) => {
+    try {
+      const token = jwt.sign(
+        {
+          userId: req.user._id,
+          email: req.user.email,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7d",
+        },
+      );
+
+      const user = encodeURIComponent(
+        JSON.stringify({
+          id: req.user._id,
+          name: req.user.name,
+          email: req.user.email,
+        }),
+      );
+
+      res.redirect(
+        `http://localhost:5173/google-success?token=${token}&user=${user}`,
+      );
+    } catch (err) {
+      res.redirect("http://localhost:5173/login");
+    }
+  },
+);
 
 module.exports = router;

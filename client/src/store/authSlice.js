@@ -7,13 +7,19 @@ export const registerUser = createAsyncThunk(
   "auth/register",
   async ({ name, email, password }, { rejectWithValue }) => {
     try {
-      const { data } = await api.post("/auth/register", { name, email, password });
+      const { data } = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
       localStorage.setItem("token", data.token);
       return data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Registration failed");
+      return rejectWithValue(
+        err.response?.data?.message || "Registration failed",
+      );
     }
-  }
+  },
 );
 
 export const loginUser = createAsyncThunk(
@@ -26,7 +32,7 @@ export const loginUser = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Login failed");
     }
-  }
+  },
 );
 
 // Rehydrates auth state on page refresh using the stored token
@@ -40,7 +46,7 @@ export const loadUser = createAsyncThunk(
       localStorage.removeItem("token");
       return rejectWithValue(err.response?.data?.message || "Session expired");
     }
-  }
+  },
 );
 
 const initialState = {
@@ -61,7 +67,15 @@ const authSlice = createSlice({
       state.status = "idle";
       state.error = null;
     },
+
     clearAuthError: (state) => {
+      state.error = null;
+    },
+
+    googleLoginSuccess: (state, action) => {
+      state.token = action.payload.token;
+      state.user = action.payload.user;
+      state.status = "succeeded";
       state.error = null;
     },
   },
@@ -111,5 +125,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearAuthError } = authSlice.actions;
+export const { logout, clearAuthError, googleLoginSuccess } = authSlice.actions;
 export default authSlice.reducer;

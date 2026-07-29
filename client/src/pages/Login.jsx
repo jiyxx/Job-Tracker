@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Eye, EyeOff } from "lucide-react";
 import { loginUser, clearAuthError } from "../store/authSlice";
+import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -95,6 +96,22 @@ const Login = () => {
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
           >
             {status === "loading" ? "Logging in…" : "Log in"}
+          </button>
+          <div className="my-5 flex items-center">
+            <div className="h-px flex-1 bg-gray-300"></div>
+            <span className="px-3 text-sm text-gray-500">OR</span>
+            <div className="h-px flex-1 bg-gray-300"></div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = "http://localhost:3000/api/auth/google";
+            }}
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            <FcGoogle size={22} />
+            Continue with Google
           </button>
         </form>
 

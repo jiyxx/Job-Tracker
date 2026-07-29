@@ -4,6 +4,8 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const logger = require("./middleware/logger");
 const { notFound, errorHandler } = require("./middleware/error");
+const passport = require("passport");
+require("./config/passport");
 
 const authRoutes = require("./routes/auth");
 const applicationRoutes = require("./routes/application");
@@ -23,6 +25,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(passport.initialize());
 app.use(logger);
 
 // Health check route

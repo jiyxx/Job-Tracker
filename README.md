@@ -1,4 +1,4 @@
-# 💼 JobFlow – AI-Powered Job Application Tracker
+# 💼 Job Tracker– AI-Powered Job Application Tracker
 
 <p align="center">
   A modern full-stack web application that streamlines the job search process by allowing users to manage applications, schedule interviews, organize notes, and leverage AI to summarize interview preparation notes.

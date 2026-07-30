@@ -22,7 +22,7 @@ const ChangePasswordModal = ({ open, onClose }) => {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    console.log(e.target.name, e.target.value);
+  
     setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,

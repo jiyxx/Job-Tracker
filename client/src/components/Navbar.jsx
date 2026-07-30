@@ -68,10 +68,6 @@ const Navbar = () => {
   };
 
   return (
-    // NOTE: shadow instead of border-b — a border adds to the element's
-    // rendered height, which was pushing total page height 1px past 100vh
-    // and causing a persistent scrollbar. box-shadow doesn't affect layout
-    // height, so it gives the same visual divider without the overflow.
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link

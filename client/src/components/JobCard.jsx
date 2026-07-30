@@ -1,6 +1,5 @@
 import { useDispatch } from "react-redux";
 import { Pencil, Trash2, Sparkles } from "lucide-react";
-import { deleteApplication } from "../store/applicationsSlice";
 import StatusBadge from "./StatusBadge";
 
 const formatDate = (isoString) => {

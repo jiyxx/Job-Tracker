@@ -22,7 +22,6 @@ const ChangePasswordModal = ({ open, onClose }) => {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-  
     setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -34,6 +33,10 @@ const ChangePasswordModal = ({ open, onClose }) => {
 
     if (form.newPassword !== form.confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+    if (form.newPassword.length < 6) {
+      setError("Password must be at least 6 characters");
       return;
     }
 

@@ -106,7 +106,7 @@ const Login = () => {
           <button
             type="button"
             onClick={() => {
-              window.location.href = "http://localhost:3000/api/auth/google";
+              window.location.href = `${import.meta.env.VITE_SERVER_URL}/api/auth/google`
             }}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
           >

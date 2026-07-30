@@ -40,7 +40,7 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    next(error);
   }
 });
 
@@ -82,7 +82,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    next(error);
   }
 });
 
@@ -109,7 +109,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
   }),
   async (req, res) => {
     try {
@@ -133,10 +133,12 @@ router.get(
       );
 
       res.redirect(
-        `http://localhost:5173/google-success?token=${token}&user=${user}`,
+        `${process.env.CLIENT_URL}/google-success?token=${token}&user=${user}`,
       );
     } catch (err) {
-      res.redirect("http://localhost:5173/login");
+      res.redirect(
+        `${process.env.CLIENT_URL}/google-success?token=${token}&user=${user}`,
+      );
     }
   },
 );
@@ -146,6 +148,11 @@ router.get(
 router.put("/change-password", protect, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+    if (!user.password) {
+      return res
+        .status(400)
+        .json({ message: "Google accounts do not support password change" });
+    }
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
@@ -161,10 +168,7 @@ router.put("/change-password", protect, async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -180,10 +184,7 @@ router.put("/change-password", protect, async (req, res) => {
       message: "Password updated successfully",
     });
   } catch (error) {
-    res.status(500).json({
-      message: "Server error",
-      error: error.message,
-    });
+    next(error);
   }
 });
 module.exports = router;

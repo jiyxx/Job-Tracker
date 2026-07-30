@@ -61,31 +61,6 @@ const ChangePasswordModal = ({ open, onClose }) => {
 
   if (!open) return null;
 
-  //   const PasswordInput = ({ name, label, visible, toggle }) => (
-  //     <div>
-  //       <label className="mb-2 block text-sm font-semibold">{label}</label>
-
-  //       <div className="relative">
-  //         <input
-  //           type={visible ? "text" : "password"}
-  //           name={name}
-  //           value={form[ name]}
-  //           onChange={handleChange}
-  //           required
-  //           className="w-full rounded-xl border px-4 py-3 pr-10"
-  //         />
-
-  //         <button
-  //           type="button"
-  //           onClick={toggle}
-  //           className="absolute right-3 top-3"
-  //         >
-  //           {visible ? <EyeOff size={18} /> : <Eye size={18} />}
-  //         </button>
-  //       </div>
-  //     </div>
-  //   );
-
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm"

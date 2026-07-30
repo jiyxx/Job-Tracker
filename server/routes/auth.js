@@ -8,7 +8,7 @@ const passport = require("passport");
 const router = express.Router();
 
 // REGISTER
-router.post("/register", async (req, res) => {
+router.post("/register", async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
@@ -45,7 +45,7 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -136,24 +136,16 @@ router.get(
         `${process.env.CLIENT_URL}/google-success?token=${token}&user=${user}`,
       );
     } catch (err) {
-      res.redirect(
-        `${process.env.CLIENT_URL}/google-success?token=${token}&user=${user}`,
-      );
+      res.redirect(`${process.env.CLIENT_URL}/login`);
     }
   },
 );
 
 // CHANGE PASSWORD
 // CHANGE PASSWORD
-router.put("/change-password", protect, async (req, res) => {
+router.put("/change-password", protect, async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    if (!user.password) {
-      return res
-        .status(400)
-        .json({ message: "Google accounts do not support password change" });
-    }
-
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
         message: "All fields are required",
@@ -166,6 +158,12 @@ router.put("/change-password", protect, async (req, res) => {
       return res.status(404).json({
         message: "User not found",
       });
+    }
+
+    if (!user.password) {
+      return res
+        .status(400)
+        .json({ message: "Google accounts do not support password change" });
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);

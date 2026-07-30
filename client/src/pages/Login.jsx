@@ -93,7 +93,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-bold text-gray-900 hover:bg-gray-50 disabled:opacity-60"
+            className="w-full rounded-lg border border-gray-300 bg-teal-600 px-4 py-3 text-sm font-bold text-white hover:bg-teal-700 disabled:opacity-60"
           >
             {status === "loading" ? "Logging in…" : "Log in"}
           </button>

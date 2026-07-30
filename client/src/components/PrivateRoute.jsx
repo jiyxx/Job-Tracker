@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useAuthReady } from "../context/AuthContext";
+import { useAuthReady } from "../context/Authcontext";
 
 // Wraps protected routes. Waits for the initial session check to finish
 // (so a page refresh doesn't flash-redirect to /login before loadUser resolves),

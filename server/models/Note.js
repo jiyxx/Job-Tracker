@@ -31,6 +31,10 @@ const noteSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+        aiSummaryOutdated: {
+            type: Boolean,
+            default: false,
+        },
         deletedAt: {
             type: Date,
             default: null,  

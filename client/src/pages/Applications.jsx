@@ -351,21 +351,21 @@ const Applications = () => {
                     AI Summary
                   </h3>
 
-                  {!selectedApplication.aiSummary && (
-                    <button
-                      onClick={(e) =>
-                        handleAiSummary(selectedApplication._id, e)
-                      }
-                      disabled={summaryLoadingId === selectedApplication._id}
-                      className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
-                    >
-                      <Sparkles size={12} />
+                  <button
+                    onClick={(e) =>
+                      handleAiSummary(selectedApplication._id, e)
+                    }
+                    disabled={summaryLoadingId === selectedApplication._id}
+                    className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    <Sparkles size={12} />
 
-                      {summaryLoadingId === selectedApplication._id
-                        ? "Generating..."
+                    {summaryLoadingId === selectedApplication._id
+                      ? "Generating..."
+                      : selectedApplication.aiSummary
+                        ? "Regenerate AI Summary"
                         : "Generate AI Summary"}
-                    </button>
-                  )}
+                  </button>
                 </div>
 
                 {selectedApplication.aiSummary ? (

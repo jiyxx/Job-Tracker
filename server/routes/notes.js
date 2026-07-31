@@ -84,10 +84,25 @@ router.put("/:id", async (req, res, next) => {
   try {
     const update = { ...req.body };
     delete update.aiSummary;
+    delete update.aiSummaryOutdated;
+
+    const existingNote = await Note.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+      deletedAt: null,
+    });
+    if (!existingNote) throw new AppError("Note not found", 404);
+
+    const summaryNeedsRefresh =
+      Boolean(existingNote.aiSummary) &&
+      update.content !== undefined &&
+      update.content !== existingNote.content;
+
+    if (summaryNeedsRefresh) update.aiSummaryOutdated = true;
 
     const note = await Note.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id, deletedAt: null },
-      { ...update, aiSummary: "" },
+      update,
       { returnDocument: "after", runValidators: true }
     );
     if (!note) throw new AppError("Note not found", 404);
@@ -158,6 +173,7 @@ router.post("/:id/summarize", async (req, res, next) => {
     });
  
     note.aiSummary = summary;
+    note.aiSummaryOutdated = false;
     await note.save();
  
     res.json({ id: note._id, aiSummary: summary });
@@ -167,4 +183,3 @@ router.post("/:id/summarize", async (req, res, next) => {
 });
  
 module.exports = router;
- 

@@ -140,7 +140,7 @@ router.put("/:id", async (req, res, next) => {
 
     const application = await Application.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { ...update, aiSummary: "" },
+      update,
       { returnDocument: "after", runValidators: true },
     );
 

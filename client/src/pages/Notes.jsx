@@ -313,7 +313,9 @@ const Notes = () => {
                   <span>
                     {summaryLoadingId === note._id
                       ? "Generating..."
-                      : "AI summary"}
+                      : note.aiSummary
+                        ? "Regenerate summary"
+                        : "AI summary"}
                   </span>
                 </button>
               </div>
@@ -417,22 +419,29 @@ const Notes = () => {
                     <Sparkles size={14} className="text-purple-600" />
                     AI Summary
                   </h3>
-                  {!selectedNote.aiSummary && (
-                    <button
-                      onClick={(e) => handleAiSummary(selectedNote._id, e)}
-                      disabled={summaryLoadingId === selectedNote._id}
-                      className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      <Sparkles size={12} className="text-purple-600" />
-                      {summaryLoadingId === selectedNote._id
-                        ? "Generating..."
+                  <button
+                    onClick={(e) => handleAiSummary(selectedNote._id, e)}
+                    disabled={summaryLoadingId === selectedNote._id}
+                    className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    <Sparkles size={12} className="text-purple-600" />
+                    {summaryLoadingId === selectedNote._id
+                      ? "Generating..."
+                      : selectedNote.aiSummary
+                        ? "Regenerate AI Summary"
                         : "Generate AI Summary"}
-                    </button>
-                  )}
+                  </button>
                 </div>
 
                 {selectedNote.aiSummary ? (
-                  <SummaryRenderer text={selectedNote.aiSummary} />
+                  <>
+                    {selectedNote.aiSummaryOutdated && (
+                      <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                        This summary was generated before your latest content edit. Regenerate it to include your changes.
+                      </p>
+                    )}
+                    <SummaryRenderer text={selectedNote.aiSummary} />
+                  </>
                 ) : (
                   <p className="text-xs text-gray-400 italic">
                     No AI summary generated yet. Click "Generate AI Summary" to
